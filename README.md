@@ -355,10 +355,3 @@ This project used AI assistance (Claude,ChatGPT) for:
 - Practice question generation prompts
 - User flow and feature prioritization
 
-
-## Team Name:
-
-CODENOVA 
-
-
-***
