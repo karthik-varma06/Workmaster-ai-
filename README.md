@@ -356,7 +356,7 @@ This project used AI assistance (Claude,ChatGPT) for:
 - User flow and feature prioritization
 
 
-## Team
+## Team Name:
 
 CODENOVA 
 
