@@ -200,14 +200,14 @@ graph TB
 ### What We Built (24-Hour Sprint)
 
 **Core Features Implemented:**
-✅ Document upload (PDF, DOCX, TXT) with user type separation
-✅ RAG-based Q\&A with source citations
-✅ Confidence scoring system
-✅ Knowledge gap tracking (companies)
-✅ Weak topic identification (students)
-✅ Practice quiz generator (students)
-✅ Real-time chat interface with smooth animations
-✅ Document management (view, delete)
+-Document upload (PDF, DOCX, TXT) with user type separation
+-RAG-based Q\&A with source citations
+-Confidence scoring system
+-Knowledge gap tracking (companies)
+-Weak topic identification (students)
+-Practice quiz generator (students)
+-Real-time chat interface with smooth animations
+-Document management (view, delete)
 
 **What's Stubbed/Simplified:**
 
@@ -355,7 +355,6 @@ This project used AI assistance (Claude,ChatGPT) for:
 - Practice question generation prompts
 - User flow and feature prioritization
 
-**Screenshots of the website**
 
 ## Team
 
