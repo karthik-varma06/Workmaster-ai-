@@ -1,0 +1,10 @@
+[
+  {
+    "query": "what is the cgpa of the student ",
+    "confidence": 0.2,
+    "answer": "I don't have information about this in your uploaded documents.\n\n\n\n",
+    "sources_count": 1,
+    "timestamp": "2026-01-25T01:04:10.077774",
+    "user_type": "company"
+  }
+]

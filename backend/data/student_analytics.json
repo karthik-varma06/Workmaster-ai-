@@ -1,0 +1,25 @@
+{
+  "queries": [
+    {
+      "query": "what the educations levels he comepleted i nresume ",
+      "confidence": 0.4,
+      "topic": "educations levels comepleted",
+      "sources": [
+        "Resume1 (8).pdf",
+        "HR.pdf"
+      ],
+      "timestamp": "2026-01-25T01:29:54.430598",
+      "weak": true
+    }
+  ],
+  "topics": {
+    "educations levels comepleted": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.4,
+      "last_asked": "2026-01-25T01:29:54.430598"
+    }
+  },
+  "weak_topics": [],
+  "study_sessions": []
+}
