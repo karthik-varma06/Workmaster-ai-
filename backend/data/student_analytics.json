@@ -1,7 +1,7 @@
 {
   "queries": [
     {
-      "query": "what the educations levels he comepleted i nresume ",
+      "query": "what the educations levels he comepleted in resume ",
       "confidence": 0.4,
       "topic": "educations levels comepleted",
       "sources": [
@@ -10,6 +10,115 @@
       ],
       "timestamp": "2026-01-25T01:29:54.430598",
       "weak": true
+    },
+    {
+      "query": "what is regression??",
+      "confidence": 0.9,
+      "topic": "regression??",
+      "sources": [
+        "Regression, Linear Regression.pdf"
+      ],
+      "timestamp": "2026-01-25T04:16:05.875107",
+      "weak": false
+    },
+    {
+      "query": "explain me about regression??",
+      "confidence": 0.9,
+      "topic": "regression??",
+      "sources": [
+        "Regression, Linear Regression.pdf"
+      ],
+      "timestamp": "2026-01-25T06:00:27.893014",
+      "weak": false
+    },
+    {
+      "query": "can u summerize it more",
+      "confidence": 0.25,
+      "topic": "summerize more",
+      "sources": [
+        "Regression, Linear Regression.pdf"
+      ],
+      "timestamp": "2026-01-25T06:00:52.213014",
+      "weak": true
+    },
+    {
+      "query": "can you tell me about spiral model with adv and disadvantages in simple",
+      "confidence": 0.0,
+      "topic": "spiral model disadvantages",
+      "sources": [
+        "Software Process Models 1.pdf"
+      ],
+      "timestamp": "2026-02-25T23:44:46.567781",
+      "weak": true
+    },
+    {
+      "query": "tell me about rag pipeline ",
+      "confidence": 0.0,
+      "topic": "pipeline",
+      "sources": [
+        "HR.pdf"
+      ],
+      "timestamp": "2026-03-02T00:40:20.328099",
+      "weak": true
+    },
+    {
+      "query": "What is this document about?",
+      "confidence": 0.0,
+      "topic": "this document about?",
+      "sources": [
+        "HR.pdf"
+      ],
+      "timestamp": "2026-03-02T01:14:24.528020",
+      "weak": true
+    },
+    {
+      "query": "tell me about rag pipeline in simple ",
+      "confidence": 0.4,
+      "topic": "pipeline simple",
+      "sources": [
+        "HR.pdf"
+      ],
+      "timestamp": "2026-03-02T01:24:35.473427",
+      "weak": true
+    },
+    {
+      "query": "tell me about RAG pipeline",
+      "confidence": 0.4,
+      "topic": "pipeline",
+      "sources": [
+        "UML Model, Developing Use Cases.pdf"
+      ],
+      "timestamp": "2026-03-02T01:43:03.897973",
+      "weak": true
+    },
+    {
+      "query": "tell me about user requirements??",
+      "confidence": 0.75,
+      "topic": "user requirements??",
+      "sources": [
+        "Module No. 2 - Requirements Engineering and Design.pdf",
+        "UML Model, Developing Use Cases.pdf"
+      ],
+      "timestamp": "2026-03-02T02:31:59.916784",
+      "weak": false
+    },
+    {
+      "query": "what is my cgpa??",
+      "confidence": 0.25,
+      "topic": "cgpa??",
+      "sources": [],
+      "timestamp": "2026-03-02T02:36:17.196310",
+      "weak": true
+    },
+    {
+      "query": "can you provide me summarized answer about my TaskFlow project ",
+      "confidence": 0.6,
+      "topic": "provide summarized answer",
+      "sources": [
+        "Karthikeya Intern Resume.pdf"
+      ],
+      "timestamp": "2026-05-30T10:34:46.056275",
+      "weak": false
     }
   ],
   "topics": {
@@ -18,8 +127,71 @@
       "low_confidence_count": 1,
       "total_confidence": 0.4,
       "last_asked": "2026-01-25T01:29:54.430598"
+    },
+    "regression??": {
+      "count": 2,
+      "low_confidence_count": 0,
+      "total_confidence": 1.8,
+      "last_asked": "2026-01-25T06:00:27.893014"
+    },
+    "summerize more": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.25,
+      "last_asked": "2026-01-25T06:00:52.213014"
+    },
+    "spiral model disadvantages": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.0,
+      "last_asked": "2026-02-25T23:44:46.567781"
+    },
+    "pipeline": {
+      "count": 2,
+      "low_confidence_count": 2,
+      "total_confidence": 0.4,
+      "last_asked": "2026-03-02T01:43:03.897973"
+    },
+    "this document about?": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.0,
+      "last_asked": "2026-03-02T01:14:24.528020"
+    },
+    "pipeline simple": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.4,
+      "last_asked": "2026-03-02T01:24:35.473427"
+    },
+    "user requirements??": {
+      "count": 1,
+      "low_confidence_count": 0,
+      "total_confidence": 0.75,
+      "last_asked": "2026-03-02T02:31:59.916784"
+    },
+    "cgpa??": {
+      "count": 1,
+      "low_confidence_count": 1,
+      "total_confidence": 0.25,
+      "last_asked": "2026-03-02T02:36:17.196310"
+    },
+    "provide summarized answer": {
+      "count": 1,
+      "low_confidence_count": 0,
+      "total_confidence": 0.6,
+      "last_asked": "2026-05-30T10:34:46.056275"
     }
   },
-  "weak_topics": [],
+  "weak_topics": [
+    {
+      "topic": "pipeline",
+      "weakness_score": 0.92,
+      "query_count": 2,
+      "avg_confidence": 0.2,
+      "low_confidence_count": 2,
+      "last_asked": "2026-03-02T01:43:03.897973"
+    }
+  ],
   "study_sessions": []
 }

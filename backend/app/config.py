@@ -9,7 +9,7 @@ class Settings:
     SITE_NAME = os.getenv("SITE_NAME", "WorkMaster AI")
     
     # Model settings
-    LLM_MODEL = "google/gemma-3-27b-it:free"
+    LLM_MODEL = "openrouter/free"
     EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
     
     # Chunking settings

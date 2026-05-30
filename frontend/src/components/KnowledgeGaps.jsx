@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { FiArrowLeft, FiTrash2, FiAlertCircle, FiBarChart2 } from 'react-icons/fi';
+import { FiArrowLeft, FiTrash2, FiAlertCircle } from 'react-icons/fi';
+import '../styles/knowledge-gaps.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -72,235 +73,30 @@ function KnowledgeGaps({ userType }) {
     return getSeverityLevel(gap.confidence) === filterLevel;
   });
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '40px 20px',
-    },
-    header: {
-      maxWidth: '1200px',
-      margin: '0 auto 30px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '20px',
-    },
-    backButton: {
-      padding: '12px 24px',
-      background: 'rgba(255, 255, 255, 0.95)',
-      border: 'none',
-      borderRadius: '12px',
-      color: '#667eea',
-      fontWeight: '600',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '14px',
-      transition: 'all 0.3s',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    },
-    headerTitle: {
-      flex: 1,
-      color: 'white',
-      margin: 0,
-      fontSize: '32px',
-      fontWeight: '800',
-    },
-    clearButton: {
-      padding: '12px 24px',
-      background: 'rgba(239, 68, 68, 0.95)',
-      border: 'none',
-      borderRadius: '12px',
-      color: 'white',
-      fontWeight: '600',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '14px',
-      transition: 'all 0.3s',
-      boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
-    },
-    statsContainer: {
-      maxWidth: '1200px',
-      margin: '0 auto 30px',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '20px',
-    },
-    statCard: {
-      background: 'rgba(255, 255, 255, 0.95)',
-      padding: '25px',
-      borderRadius: '16px',
-      textAlign: 'center',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    },
-    statNumber: {
-      fontSize: '36px',
-      fontWeight: '800',
-      marginBottom: '8px',
-    },
-    statLabel: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#6b7280',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-    },
-    filterContainer: {
-      maxWidth: '1200px',
-      margin: '0 auto 20px',
-      display: 'flex',
-      gap: '10px',
-      flexWrap: 'wrap',
-    },
-    filterButton: {
-      padding: '10px 20px',
-      background: 'rgba(255, 255, 255, 0.95)',
-      border: '2px solid transparent',
-      borderRadius: '12px',
-      color: '#4b5563',
-      fontWeight: '600',
-      cursor: 'pointer',
-      fontSize: '14px',
-      transition: 'all 0.3s',
-    },
-    filterButtonActive: {
-      background: 'rgba(255, 255, 255, 1)',
-      borderColor: '#667eea',
-      color: '#667eea',
-    },
-    content: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      background: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: '20px',
-      padding: '30px',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-    },
-    contentHeader: {
-      marginBottom: '25px',
-      paddingBottom: '20px',
-      borderBottom: '2px solid #e5e7eb',
-    },
-    contentTitle: {
-      fontSize: '24px',
-      fontWeight: '700',
-      color: '#1f2937',
-      margin: '0 0 8px 0',
-    },
-    contentSubtitle: {
-      fontSize: '14px',
-      color: '#6b7280',
-      margin: 0,
-    },
-    emptyState: {
-      textAlign: 'center',
-      padding: '60px 20px',
-      color: '#9ca3af',
-    },
-    emptyIcon: {
-      fontSize: '64px',
-      marginBottom: '20px',
-    },
-    emptyText: {
-      fontSize: '18px',
-      fontWeight: '600',
-      color: '#6b7280',
-    },
-    gapsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '15px',
-    },
-    gapItem: {
-      background: '#f8f9ff',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      padding: '20px',
-      transition: 'all 0.3s',
-    },
-    gapHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: '12px',
-      gap: '15px',
-    },
-    gapQuestion: {
-      flex: 1,
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#1f2937',
-      lineHeight: '1.5',
-      margin: 0,
-    },
-    confidenceBadge: {
-      padding: '6px 14px',
-      borderRadius: '20px',
-      fontSize: '12px',
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-      whiteSpace: 'nowrap',
-      flexShrink: 0,
-    },
-    gapMeta: {
-      display: 'flex',
-      gap: '15px',
-      fontSize: '13px',
-      color: '#6b7280',
-      marginTop: '10px',
-    },
-    metaItem: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px',
-    },
-    loadingContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '60px 20px',
-    },
-    dotsContainer: {
-      display: 'flex',
-      gap: '10px',
-    },
-    dot: {
-      width: '14px',
-      height: '14px',
-      borderRadius: '50%',
-      background: '#667eea',
-    },
-  };
-
   if (userType !== 'company') {
     return null;
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="knowledge-gaps-container">
+      <div className="knowledge-gaps-header">
         <motion.button
-          style={styles.backButton}
+          className="knowledge-gaps-back-button"
           onClick={() => navigate('/chat')}
-          whileHover={{ scale: 1.05, boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)' }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           <FiArrowLeft size={18} />
           Back to Chat
         </motion.button>
 
-        <h1 style={styles.headerTitle}>Knowledge Gaps</h1>
+        <h1 className="knowledge-gaps-header-title">Knowledge Gaps</h1>
 
         {gaps.length > 0 && (
           <motion.button
-            style={styles.clearButton}
+            className="knowledge-gaps-clear-button"
             onClick={handleClearGaps}
-            whileHover={{ scale: 1.05, boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4)' }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <FiTrash2 size={18} />
@@ -311,41 +107,38 @@ function KnowledgeGaps({ userType }) {
 
       {statistics && (
         <motion.div
-          style={styles.statsContainer}
+          className="knowledge-gaps-stats-container"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <motion.div style={styles.statCard} whileHover={{ scale: 1.05 }}>
-            <div style={{ ...styles.statNumber, color: '#667eea' }}>
+          <motion.div className="knowledge-gaps-stat-card" whileHover={{ scale: 1.05 }}>
+            <div className="knowledge-gaps-stat-number">
               {statistics.total_queries}
             </div>
-            <div style={styles.statLabel}>Total Queries</div>
+            <div className="knowledge-gaps-stat-label">Total Queries</div>
           </motion.div>
 
-          <motion.div style={styles.statCard} whileHover={{ scale: 1.05 }}>
-            <div style={{ ...styles.statNumber, color: '#ef4444' }}>
+          <motion.div className="knowledge-gaps-stat-card" whileHover={{ scale: 1.05 }}>
+            <div className="knowledge-gaps-stat-number">
               {statistics.low_confidence_count}
             </div>
-            <div style={styles.statLabel}>Knowledge Gaps</div>
+            <div className="knowledge-gaps-stat-label">Knowledge Gaps</div>
           </motion.div>
 
-          <motion.div style={styles.statCard} whileHover={{ scale: 1.05 }}>
-            <div style={{ ...styles.statNumber, color: '#10b981' }}>
+          <motion.div className="knowledge-gaps-stat-card" whileHover={{ scale: 1.05 }}>
+            <div className="knowledge-gaps-stat-number">
               {statistics.avg_confidence ? `${(statistics.avg_confidence * 100).toFixed(0)}%` : 'N/A'}
             </div>
-            <div style={styles.statLabel}>Avg Confidence</div>
+            <div className="knowledge-gaps-stat-label">Avg Confidence</div>
           </motion.div>
         </motion.div>
       )}
 
-      <div style={styles.filterContainer}>
+      <div className="knowledge-gaps-filter-container">
         {['all', 'critical', 'medium', 'low'].map((level) => (
           <motion.button
             key={level}
-            style={{
-              ...styles.filterButton,
-              ...(filterLevel === level ? styles.filterButtonActive : {}),
-            }}
+            className={`knowledge-gaps-filter-button ${filterLevel === level ? 'active' : ''}`}
             onClick={() => setFilterLevel(level)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -356,90 +149,82 @@ function KnowledgeGaps({ userType }) {
       </div>
 
       <motion.div
-        style={styles.content}
+        className="knowledge-gaps-content"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <div style={styles.contentHeader}>
-          <h2 style={styles.contentTitle}>
+        <div className="knowledge-gaps-content-header">
+          <h2 className="knowledge-gaps-content-title">
             <FiAlertCircle style={{ verticalAlign: 'middle', marginRight: '10px' }} />
             Questions your documents couldn't answer well
           </h2>
-          <p style={styles.contentSubtitle}>
+          <p className="knowledge-gaps-content-subtitle">
             {filteredGaps.length} gap{filteredGaps.length !== 1 ? 's' : ''} found
           </p>
         </div>
 
         {loading ? (
-          <div style={styles.loadingContainer}>
-            <div style={styles.dotsContainer}>
+          <div className="knowledge-gaps-loading-container">
+            <div className="knowledge-gaps-dots-container">
               <motion.div
-                style={styles.dot}
+                className="knowledge-gaps-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
               />
               <motion.div
-                style={styles.dot}
+                className="knowledge-gaps-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
               />
               <motion.div
-                style={styles.dot}
+                className="knowledge-gaps-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
               />
             </div>
           </div>
         ) : filteredGaps.length === 0 ? (
-          <div style={styles.emptyState}>
-            <div style={styles.emptyIcon}>✅</div>
-            <div style={styles.emptyText}>
+          <div className="knowledge-gaps-empty-state">
+            <div className="knowledge-gaps-empty-icon">✅</div>
+            <div className="knowledge-gaps-empty-text">
               {filterLevel === 'all' 
                 ? 'Your documents are covering all questions well.'
                 : `No ${filterLevel} priority gaps found.`}
             </div>
           </div>
         ) : (
-          <div style={styles.gapsList}>
+          <div className="knowledge-gaps-list">
             <AnimatePresence>
               {filteredGaps.map((gap, index) => (
                 <motion.div
                   key={index}
-                  style={{
-                    ...styles.gapItem,
-                    borderLeftWidth: '4px',
-                    borderLeftColor: getConfidenceColor(gap.confidence),
-                  }}
+                  className="knowledge-gaps-item"
+                  style={{ borderLeftColor: getConfidenceColor(gap.confidence) }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+                  whileHover={{ scale: 1.02 }}
                 >
-                  <div style={styles.gapHeader}>
-                    <p style={styles.gapQuestion}>{gap.query}</p>
+                  <div className="knowledge-gaps-item-header">
+                    <p className="knowledge-gaps-item-question">{gap.query}</p>
                     <span
-                      style={{
-                        ...styles.confidenceBadge,
-                        background: getConfidenceColor(gap.confidence) + '20',
-                        color: getConfidenceColor(gap.confidence),
-                      }}
+                      className={`knowledge-gaps-confidence-badge knowledge-gaps-confidence-${getSeverityLevel(gap.confidence)}`}
                     >
                       {getConfidenceLabel(gap.confidence)}
                     </span>
                   </div>
 
-                  <div style={styles.gapMeta}>
-                    <div style={styles.metaItem}>
-                      <FiBarChart2 size={14} />
+                  <div className="knowledge-gaps-item-meta">
+                    <div className="knowledge-gaps-meta-item">
                       <span>Confidence: {(gap.confidence * 100).toFixed(0)}%</span>
                     </div>
-                    <div style={styles.metaItem}>
+                    <div className="knowledge-gaps-meta-item">
                       <span>•</span>
                       <span>Count: {gap.count}</span>
                     </div>
-                    <div style={styles.metaItem}>
+                    <div className="knowledge-gaps-meta-item">
                       <span>•</span>
                       <span>
                         {new Date(gap.last_asked).toLocaleDateString('en-US', {

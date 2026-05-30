@@ -1,10 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 from typing import List, Optional
 import os
-import shutil
 from datetime import datetime
-import asyncio
 import logging
 from app.knowledge_gaps import knowledge_gap_tracker
 from app.student_analytics import student_analytics
@@ -18,7 +17,7 @@ from app.models import (
 from app.rag_engine import rag_engine
 from app.utils import (
     create_directories, extract_text_from_file,
-    get_confidence_level, get_file_hash
+    get_confidence_level
 )
 
 # Setup logging
@@ -28,8 +27,51 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
-app = FastAPI(title="WorkMaster AI API")
+# Create necessary directories on startup
+create_directories()
+logger.info("=" * 70)
+logger.info("🚀 WorkMaster AI Backend Starting...")
+logger.info("=" * 70)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    # Startup
+    logger.info("🔍 Running startup validations...")
+    
+    try:
+        # Check FAISS files existence
+        vector_store_dir = settings.VECTOR_STORE_DIR
+        index_path = os.path.join(vector_store_dir, "faiss_index.faiss")
+        metadata_path = os.path.join(vector_store_dir, "metadata.pkl")
+        
+        if os.path.exists(index_path) and os.path.exists(metadata_path):
+            logger.info(f"✅ Vector store files found at {vector_store_dir}")
+        else:
+            logger.info(f"⚠️ No existing vector store found at {vector_store_dir}")
+        
+        # Check RAG engine and document count
+        doc_count = len(rag_engine.get_all_documents())
+        logger.info(f"📊 Current documents in vector store: {doc_count}")
+        
+        if doc_count == 0:
+            logger.warning("⚠️ Vector store is empty - no documents loaded")
+        
+        logger.info("✅ Startup validations completed")
+        
+    except Exception as e:
+        logger.error(f"❌ Startup validation error: {e}")
+        logger.warning("⚠️ Continuing with warnings...")
+    
+    yield
+    
+    # Shutdown
+    logger.info("🛑 Shutting down WorkMaster AI Backend...")
+
+
+# Initialize FastAPI app with lifespan
+app = FastAPI(title="WorkMaster AI API", version="1.0.0", lifespan=lifespan)
 
 # CORS middleware
 app.add_middleware(
@@ -40,23 +82,93 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create necessary directories on startup
-create_directories()
-logger.info("=" * 70)
-logger.info("🚀 WorkMaster AI Backend Starting...")
-logger.info("=" * 70)
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint to verify system status and component availability."""
+    try:
+        doc_count = len(rag_engine.get_all_documents())
+        vector_store_empty = doc_count == 0
+        
+        # Check embedding model availability
+        embedding_model_loaded = False
+        try:
+            # Verify embeddings model is initialized by checking if it can generate embeddings
+            if hasattr(rag_engine, 'embeddings') and rag_engine.embeddings is not None:
+                embedding_model_loaded = True
+                logger.info("✅ Embedding model is loaded and available")
+            else:
+                logger.warning("⚠️ Embedding model not properly initialized")
+        except Exception as e:
+            logger.error(f"❌ Embedding model check failed: {e}")
+        
+        # Check LLM availability by testing initialization
+        llm_available = False
+        try:
+            # Check if LLM is initialized (don't actually call it, just verify setup)
+            if hasattr(rag_engine, 'llm') and rag_engine.llm is not None:
+                llm_available = True
+                logger.info("✅ LLM is initialized and available")
+            else:
+                logger.warning("⚠️ LLM not properly initialized")
+        except Exception as e:
+            logger.error(f"❌ LLM availability check failed: {e}")
+        
+        logger.info(f"🏥 Health check: {doc_count} documents, embeddings={embedding_model_loaded}, llm={llm_available}")
+        
+        return {
+            "success": True,
+            "status": "healthy" if embedding_model_loaded and llm_available else "degraded",
+            "data": {
+                "documents_loaded": doc_count,
+                "vector_store_empty": vector_store_empty,
+                "embedding_model_loaded": embedding_model_loaded,
+                "llm_available": llm_available,
+                "timestamp": datetime.now().isoformat()
+            }
+        }
+    except Exception as e:
+        logger.error(f"❌ Health check failed: {e}")
+        return {
+            "success": False,
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
 
 @app.get("/")
 async def root():
+    """Root endpoint."""
     logger.info("🏠 Root endpoint accessed")
-    return {"message": "WorkMaster AI API is running", "status": "healthy"}
+    return {
+        "success": True,
+        "data": {
+            "message": "WorkMaster AI API is running",
+            "status": "healthy"
+        }
+    }
 
 @app.post("/api/upload", response_model=UploadResponse)
 async def upload_documents(
     files: List[UploadFile] = File(...),
     user_type: str = "student"
-):
-    """Upload and process multiple documents"""
+) -> UploadResponse:
+    """Upload and process multiple documents.
+    
+    Accepts PDF, DOCX, and TXT files. Each file is extracted, chunked,
+    and added to the vector store with metadata including user_type and page numbers.
+    
+    Args:
+        files: List of files to upload (must be PDF, DOCX, or TXT).
+        user_type: User type ('student' or 'company') to associate with documents.
+        
+    Returns:
+        UploadResponse with summary of successful and failed uploads.
+        
+    Note:
+        Files are processed in batches. Each file is stored with metadata
+        including filename, upload_date, file_type, user_type, and chunk_count.
+    """
     logger.info("=" * 70)
     logger.info(f"📤 Upload request received - {len(files)} files, user_type: {user_type}")
     logger.info("=" * 70)
@@ -186,7 +298,7 @@ async def clear_student_analytics():
 async def generate_practice_quiz(
     topic: Optional[str] = Query(None),
     num_questions: int = Query(5, ge=1, le=20),
-    difficulty: str = Query("medium", regex="^(easy|medium|hard)$")
+    difficulty: str = Query("medium", pattern="^(easy|medium|hard)$")
 ):
     """Generate practice quiz questions"""
     logger.info(f"📝 Generating {num_questions} {difficulty} questions for topic: {topic or 'General'}")
@@ -235,9 +347,10 @@ async def get_available_topics():
 
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    """Handle chat queries"""
+    """Handle chat queries with improved error handling."""
     logger.info("=" * 70)
     logger.info(f"💬 Chat request - User: {request.user_type.value}, Query: {request.query[:50]}...")
+    
     try:
         answer, sources, confidence = rag_engine.query(
             request.query,
@@ -250,26 +363,32 @@ async def chat(request: ChatRequest):
             confidence < settings.MEDIUM_CONFIDENCE
         )
         
-        # ✅ Track for company users (knowledge gaps)
+        # Track for company users (knowledge gaps)
         if request.user_type == UserType.COMPANY:
-            source_names = [s.document for s in sources]
-            knowledge_gap_tracker.track_query(
-                query=request.query,
-                confidence=confidence,
-                answer=answer,
-                sources=source_names,
-                user_type=request.user_type.value
-            )
+            try:
+                source_names = [s.document for s in sources]
+                knowledge_gap_tracker.track_query(
+                    query=request.query,
+                    confidence=confidence,
+                    answer=answer,
+                    sources=source_names,
+                    user_type=request.user_type.value
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ Could not track knowledge gap: {e}")
         
-        # ✅ Track for students (weak topics)
+        # Track for students (weak topics)
         if request.user_type == UserType.STUDENT:
-            source_names = [s.document for s in sources]
-            student_analytics.track_query(
-                query=request.query,
-                confidence=confidence,
-                topic=None,  # Auto-extract
-                sources=source_names
-            )
+            try:
+                source_names = [s.document for s in sources]
+                student_analytics.track_query(
+                    query=request.query,
+                    confidence=confidence,
+                    topic=None,
+                    sources=source_names
+                )
+            except Exception as e:
+                logger.warning(f"⚠️ Could not track student analytics: {e}")
         
         logger.info(f"✅ Response generated - Confidence: {confidence_level} ({confidence:.2%})")
         logger.info(f"📚 Sources: {len(sources)}")
@@ -284,8 +403,16 @@ async def chat(request: ChatRequest):
         )
         
     except Exception as e:
-        logger.error(f"❌ Error in chat: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.exception(f"❌ Error in chat endpoint")
+        error_message = str(e)
+        
+        # Return more specific error messages
+        if "500" in error_message or "Internal Server" in error_message:
+            error_message = "The AI service encountered an error. Please try again."
+        elif "timeout" in error_message.lower():
+            error_message = "The request took too long. Please try with a simpler question."
+        
+        raise HTTPException(status_code=500, detail=error_message)
 
     
 @app.get("/api/knowledge-gaps")
@@ -344,7 +471,7 @@ async def get_documents(user_type: Optional[str] = Query(None)):
 
 @app.delete("/api/documents/{filename}")
 async def delete_document(filename: str):
-    """Delete a document completely from vector store"""
+    """Delete a document completely from vector store."""
     logger.info(f"🗑️ Delete request for: {filename}")
     
     try:
@@ -352,14 +479,72 @@ async def delete_document(filename: str):
         
         if success:
             logger.info(f"✅ Document deleted: {filename}")
-            return {"message": f"Document {filename} deleted successfully", "success": True}
+            return {
+                "success": True,
+                "data": {
+                    "message": f"Document {filename} deleted successfully"
+                }
+            }
         else:
             logger.warning(f"⚠️ Document not found: {filename}")
             raise HTTPException(status_code=404, detail=f"Document {filename} not found")
             
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"❌ Error deleting document: {str(e)}")
+        logger.exception(f"❌ Error deleting document")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/reset-vector-store")
+async def reset_vector_store():
+    """Reset the vector store completely.
+    
+    Clears FAISS index and metadata.pkl, reinitializing an empty vector store.
+    Use with caution - this operation cannot be undone.
+    """
+    logger.info("🔄 Reset vector store request received")
+    
+    try:
+        vector_store_dir = settings.VECTOR_STORE_DIR
+        index_path = os.path.join(vector_store_dir, "faiss_index.faiss")
+        metadata_path = os.path.join(vector_store_dir, "metadata.pkl")
+        
+        # Delete FAISS index files if they exist
+        if os.path.exists(index_path):
+            try:
+                os.remove(index_path)
+                logger.info(f"🗑️ Deleted FAISS index: {index_path}")
+            except Exception as e:
+                logger.error(f"❌ Failed to delete FAISS index: {e}")
+                raise
+        
+        # Delete metadata file if it exists
+        if os.path.exists(metadata_path):
+            try:
+                os.remove(metadata_path)
+                logger.info(f"🗑️ Deleted metadata: {metadata_path}")
+            except Exception as e:
+                logger.error(f"❌ Failed to delete metadata: {e}")
+                raise
+        
+        # Reinitialize empty vector store
+        rag_engine.vector_store.store = None
+        rag_engine.documents_metadata = []
+        
+        logger.info("✅ Vector store reset successfully - initialized empty store")
+        
+        return {
+            "success": True,
+            "data": {
+                "message": "Vector store reset successfully"
+            }
+        }
+        
+    except Exception as e:
+        logger.exception(f"❌ Error resetting vector store")
+        raise HTTPException(status_code=500, detail=f"Failed to reset vector store: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

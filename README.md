@@ -355,3 +355,28 @@ This project used AI assistance (Claude,ChatGPT) for:
 - Practice question generation prompts
 - User flow and feature prioritization
 
+## Project Screenshots
+
+### Landing Page
+
+![Landing Page](screenshots/landing-page.png)
+
+### Document Upload Portal
+
+![Document Upload Portal](screenshots/document-upload-page.png)
+
+### AI Knowledge Assistant
+
+![AI Knowledge Assistant](screenshots/ai-chat-page.png)
+
+### Study Analytics Dashboard
+
+![Study Analytics Dashboard](screenshots/study-analytics-page.png)
+
+### AI Quiz Generator
+
+![AI Quiz Generator](screenshots/quiz-generator-page.png)
+
+### Knowledge Gap Analysis
+
+![Knowledge Gap Analysis](screenshots/knowledge-gap-page.png)

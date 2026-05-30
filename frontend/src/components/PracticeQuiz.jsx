@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 import { 
   FiArrowLeft, 
@@ -8,9 +8,9 @@ import {
   FiX, 
   FiRefreshCw,
   FiAward,
-  FiTarget,
-  FiBook
+  FiTarget
 } from 'react-icons/fi';
+import '../styles/quiz.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -122,335 +122,6 @@ function PracticeQuiz({ userType }) {
     return '💪';
   };
 
-  const styles = {
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '40px 20px',
-    },
-    header: {
-      maxWidth: '900px',
-      margin: '0 auto 30px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '20px',
-    },
-    backButton: {
-      padding: '12px 24px',
-      background: 'rgba(255, 255, 255, 0.95)',
-      border: 'none',
-      borderRadius: '12px',
-      color: '#667eea',
-      fontWeight: '600',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '14px',
-      transition: 'all 0.3s',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    },
-    headerTitle: {
-      flex: 1,
-      color: 'white',
-      margin: 0,
-      fontSize: '32px',
-      fontWeight: '800',
-    },
-    content: {
-      maxWidth: '900px',
-      margin: '0 auto',
-      background: 'rgba(255, 255, 255, 0.95)',
-      borderRadius: '20px',
-      padding: '40px',
-      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-    },
-    setupContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '25px',
-    },
-    setupTitle: {
-      fontSize: '24px',
-      fontWeight: '700',
-      color: '#1f2937',
-      marginBottom: '10px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '10px',
-    },
-    setupSubtitle: {
-      fontSize: '15px',
-      color: '#6b7280',
-      marginBottom: '20px',
-    },
-    formGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
-    },
-    label: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#374151',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-    },
-    select: {
-      padding: '14px 16px',
-      fontSize: '15px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      background: 'white',
-      color: '#1f2937',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      fontFamily: 'inherit',
-    },
-    input: {
-      padding: '14px 16px',
-      fontSize: '15px',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      background: 'white',
-      color: '#1f2937',
-      transition: 'all 0.3s',
-      fontFamily: 'inherit',
-    },
-    difficultyButtons: {
-      display: 'flex',
-      gap: '10px',
-    },
-    difficultyButton: {
-      flex: 1,
-      padding: '14px',
-      background: 'white',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#6b7280',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-    },
-    difficultyButtonActive: {
-      background: '#667eea',
-      borderColor: '#667eea',
-      color: 'white',
-    },
-    startButton: {
-      padding: '18px',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '16px',
-      fontSize: '18px',
-      fontWeight: '700',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
-      marginTop: '10px',
-    },
-    progressBar: {
-      height: '8px',
-      background: '#e5e7eb',
-      borderRadius: '10px',
-      overflow: 'hidden',
-      marginBottom: '30px',
-    },
-    progressFill: {
-      height: '100%',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      transition: 'width 0.3s',
-    },
-    questionHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '25px',
-    },
-    questionNumber: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#667eea',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-    },
-    questionScore: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#6b7280',
-    },
-    questionText: {
-      fontSize: '20px',
-      fontWeight: '600',
-      color: '#1f2937',
-      lineHeight: '1.6',
-      marginBottom: '30px',
-    },
-    optionsList: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      marginBottom: '25px',
-    },
-    option: {
-      padding: '18px 20px',
-      background: 'white',
-      border: '2px solid #e5e7eb',
-      borderRadius: '12px',
-      fontSize: '16px',
-      color: '#1f2937',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-    },
-    optionSelected: {
-      borderColor: '#667eea',
-      background: '#f0f9ff',
-    },
-    optionCorrect: {
-      borderColor: '#10b981',
-      background: '#d1fae5',
-    },
-    optionWrong: {
-      borderColor: '#ef4444',
-      background: '#fee2e2',
-    },
-    optionLetter: {
-      width: '32px',
-      height: '32px',
-      borderRadius: '50%',
-      background: '#f3f4f6',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontWeight: '700',
-      fontSize: '14px',
-      color: '#6b7280',
-      flexShrink: 0,
-    },
-    optionText: {
-      flex: 1,
-    },
-    optionIcon: {
-      flexShrink: 0,
-    },
-    explanation: {
-      background: '#f0f9ff',
-      border: '2px solid #bae6fd',
-      borderRadius: '12px',
-      padding: '18px',
-      marginBottom: '20px',
-    },
-    explanationTitle: {
-      fontSize: '14px',
-      fontWeight: '700',
-      color: '#0c4a6e',
-      marginBottom: '8px',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px',
-    },
-    explanationText: {
-      fontSize: '15px',
-      color: '#0c4a6e',
-      lineHeight: '1.6',
-    },
-    actionButtons: {
-      display: 'flex',
-      gap: '12px',
-    },
-    submitButton: {
-      flex: 1,
-      padding: '16px',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-    },
-    submitButtonDisabled: {
-      background: '#d1d5db',
-      cursor: 'not-allowed',
-    },
-    nextButton: {
-      flex: 1,
-      padding: '16px',
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      color: 'white',
-      border: 'none',
-      borderRadius: '12px',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-    },
-    resultsContainer: {
-      textAlign: 'center',
-    },
-    resultsEmoji: {
-      fontSize: '100px',
-      marginBottom: '20px',
-    },
-    resultsTitle: {
-      fontSize: '32px',
-      fontWeight: '800',
-      color: '#1f2937',
-      marginBottom: '15px',
-    },
-    resultsScore: {
-      fontSize: '64px',
-      fontWeight: '900',
-      marginBottom: '10px',
-    },
-    resultsText: {
-      fontSize: '18px',
-      color: '#6b7280',
-      marginBottom: '40px',
-    },
-    resultsButtons: {
-      display: 'flex',
-      gap: '12px',
-      justifyContent: 'center',
-    },
-    loadingContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '60px 20px',
-    },
-    dotsContainer: {
-      display: 'flex',
-      gap: '10px',
-      marginBottom: '20px',
-    },
-    dot: {
-      width: '14px',
-      height: '14px',
-      borderRadius: '50%',
-      background: '#667eea',
-    },
-    loadingText: {
-      fontSize: '16px',
-      color: '#6b7280',
-      fontWeight: '600',
-    },
-  };
-
   if (userType !== 'student') {
     return null;
   }
@@ -459,10 +130,12 @@ function PracticeQuiz({ userType }) {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
+    <div className="quiz-container">
+      {/* Styles now in quiz.css */}
+
+      <div className="quiz-header">
         <motion.button
-          style={styles.backButton}
+          className="quiz-back-button"
           onClick={() => navigate('/student-analytics')}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -471,30 +144,30 @@ function PracticeQuiz({ userType }) {
           Back to Analytics
         </motion.button>
 
-        <h1 style={styles.headerTitle}>🎯 Practice Quiz</h1>
+        <h1 className="quiz-header-title">🎯 Practice Quiz</h1>
       </div>
 
       <motion.div
-        style={styles.content}
+        className="quiz-content"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         {!quizStarted && !loading && (
-          <div style={styles.setupContainer}>
+          <div className="quiz-setup-container">
             <div>
-              <h2 style={styles.setupTitle}>
+              <h2 className="quiz-setup-title">
                 <FiTarget />
                 Start Your Practice Quiz
               </h2>
-              <p style={styles.setupSubtitle}>
+              <p className="quiz-setup-subtitle">
                 Test your knowledge with AI-generated questions from your study materials
               </p>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Topic (Optional)</label>
+            <div className="quiz-form-group">
+              <label className="quiz-label">Topic (Optional)</label>
               <select
-                style={styles.select}
+                className="quiz-select"
                 value={selectedTopic}
                 onChange={(e) => setSelectedTopic(e.target.value)}
               >
@@ -512,11 +185,11 @@ function PracticeQuiz({ userType }) {
               </select>
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Number of Questions</label>
+            <div className="quiz-form-group">
+              <label className="quiz-label">Number of Questions</label>
               <input
                 type="number"
-                style={styles.input}
+                className="quiz-input"
                 value={numQuestions}
                 onChange={(e) => setNumQuestions(Math.max(1, Math.min(20, parseInt(e.target.value) || 5)))}
                 min="1"
@@ -524,16 +197,13 @@ function PracticeQuiz({ userType }) {
               />
             </div>
 
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Difficulty Level</label>
-              <div style={styles.difficultyButtons}>
+            <div className="quiz-form-group">
+              <label className="quiz-label">Difficulty Level</label>
+              <div className="quiz-difficulty-buttons">
                 {['easy', 'medium', 'hard'].map((level) => (
                   <motion.button
                     key={level}
-                    style={{
-                      ...styles.difficultyButton,
-                      ...(difficulty === level ? styles.difficultyButtonActive : {}),
-                    }}
+                    className={`quiz-difficulty-button ${difficulty === level ? 'active' : ''}`}
                     onClick={() => setDifficulty(level)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -545,7 +215,7 @@ function PracticeQuiz({ userType }) {
             </div>
 
             <motion.button
-              style={styles.startButton}
+              className="quiz-start-button"
               onClick={startQuiz}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -556,77 +226,78 @@ function PracticeQuiz({ userType }) {
         )}
 
         {loading && (
-          <div style={styles.loadingContainer}>
-            <div style={styles.dotsContainer}>
+          <div className="quiz-loading-container">
+            <div className="quiz-dots-container">
               <motion.div
-                style={styles.dot}
+                className="quiz-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity }}
               />
               <motion.div
-                style={styles.dot}
+                className="quiz-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
               />
               <motion.div
-                style={styles.dot}
+                className="quiz-dot"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
               />
             </div>
-            <div style={styles.loadingText}>Generating your quiz...</div>
+            <div className="quiz-loading-text">Generating your quiz...</div>
           </div>
         )}
 
         {quizStarted && !quizCompleted && currentQ && (
           <>
-            <div style={styles.progressBar}>
-              <div style={{ ...styles.progressFill, width: `${progress}%` }} />
+            <div className="quiz-progress-bar">
+              <div className="quiz-progress-fill" style={{ width: `${progress}%` }} />
             </div>
 
-            <div style={styles.questionHeader}>
-              <div style={styles.questionNumber}>
+            <div className="quiz-question-header">
+              <div className="quiz-question-number">
                 Question {currentQuestion + 1} of {questions.length}
               </div>
-              <div style={styles.questionScore}>
+              <div className="quiz-question-score">
                 Score: {score}/{questions.length}
               </div>
             </div>
 
-            <div style={styles.questionText}>{currentQ.question}</div>
+            <div className="quiz-question-text">{currentQ.question}</div>
 
-            <div style={styles.optionsList}>
+            <div className="quiz-options-list">
               {Object.entries(currentQ.options).map(([letter, text]) => {
                 const isSelected = selectedAnswer === letter;
                 const isCorrect = letter === currentQ.correct_answer;
                 const showResult = showExplanation;
 
-                let optionStyle = styles.option;
+                let optionClasses = 'quiz-option';
                 if (showResult) {
                   if (isCorrect) {
-                    optionStyle = { ...styles.option, ...styles.optionCorrect };
+                    optionClasses += ' correct';
                   } else if (isSelected) {
-                    optionStyle = { ...styles.option, ...styles.optionWrong };
+                    optionClasses += ' wrong';
                   }
+                  optionClasses += ' disabled';
                 } else if (isSelected) {
-                  optionStyle = { ...styles.option, ...styles.optionSelected };
+                  optionClasses += ' selected';
                 }
 
                 return (
                   <motion.div
                     key={letter}
-                    style={optionStyle}
+                    className={optionClasses}
                     onClick={() => handleAnswerSelect(letter)}
                     whileHover={!showResult ? { scale: 1.02 } : {}}
                     whileTap={!showResult ? { scale: 0.98 } : {}}
                   >
-                    <div style={styles.optionLetter}>{letter}</div>
-                    <div style={styles.optionText}>{text}</div>
+                    <div className="quiz-option-letter">{letter}</div>
+                    <div className="quiz-option-text">{text}</div>
                     {showResult && isCorrect && (
-                      <FiCheck size={24} color="#10b981" style={styles.optionIcon} />
+                      <FiCheck size={24} color="#10b981" className="quiz-option-icon" />
                     )}
                     {showResult && isSelected && !isCorrect && (
-                      <FiX size={24} color="#ef4444" style={styles.optionIcon} />
+                      <FiX size={24} color="#ef4444" className="quiz-option-icon" />
                     )}
                   </motion.div>
                 );
@@ -635,24 +306,21 @@ function PracticeQuiz({ userType }) {
 
             {showExplanation && (
               <motion.div
-                style={styles.explanation}
+                className="quiz-explanation"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <div style={styles.explanationTitle}>
+                <div className="quiz-explanation-title">
                   {selectedAnswer === currentQ.correct_answer ? '✓ Correct!' : '✗ Incorrect'}
                 </div>
-                <div style={styles.explanationText}>{currentQ.explanation}</div>
+                <div className="quiz-explanation-text">{currentQ.explanation}</div>
               </motion.div>
             )}
 
-            <div style={styles.actionButtons}>
+            <div className="quiz-action-buttons">
               {!showExplanation ? (
                 <motion.button
-                  style={{
-                    ...styles.submitButton,
-                    ...(selectedAnswer ? {} : styles.submitButtonDisabled),
-                  }}
+                  className="quiz-submit-button"
                   onClick={handleSubmitAnswer}
                   disabled={!selectedAnswer}
                   whileHover={selectedAnswer ? { scale: 1.02 } : {}}
@@ -663,7 +331,7 @@ function PracticeQuiz({ userType }) {
                 </motion.button>
               ) : (
                 <motion.button
-                  style={styles.nextButton}
+                  className="quiz-next-button"
                   onClick={handleNextQuestion}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -681,29 +349,27 @@ function PracticeQuiz({ userType }) {
 
         {quizCompleted && (
           <motion.div
-            style={styles.resultsContainer}
+            className="quiz-completed-container"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <div style={styles.resultsEmoji}>
+            <div className="quiz-completed-emoji">
               {getScoreEmoji((score / questions.length) * 100)}
             </div>
-            <h2 style={styles.resultsTitle}>Quiz Complete!</h2>
+            <h2 className="quiz-completed-title">Quiz Complete!</h2>
             <div
-              style={{
-                ...styles.resultsScore,
-                color: getScoreColor((score / questions.length) * 100),
-              }}
+              className="quiz-completed-score"
+              style={{ color: getScoreColor((score / questions.length) * 100) }}
             >
               {score}/{questions.length}
             </div>
-            <p style={styles.resultsText}>
+            <p className="quiz-completed-text">
               You scored {((score / questions.length) * 100).toFixed(0)}%
             </p>
 
-            <div style={styles.resultsButtons}>
+            <div className="quiz-completed-buttons">
               <motion.button
-                style={styles.submitButton}
+                className="quiz-submit-button"
                 onClick={resetQuiz}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -712,7 +378,7 @@ function PracticeQuiz({ userType }) {
                 Try Again
               </motion.button>
               <motion.button
-                style={styles.nextButton}
+                className="quiz-next-button"
                 onClick={() => navigate('/student-analytics')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

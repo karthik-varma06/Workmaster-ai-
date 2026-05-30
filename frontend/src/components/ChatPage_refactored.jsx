@@ -90,17 +90,13 @@ function ChatPage({ userType, messages, setMessages }) {
         session_id: 'session_' + Date.now()
       });
 
-      // Log full response for debugging
       console.log('✅ Chat API Response:', response.data);
 
-      // If status is 200, always treat as valid response
-      // Backend always returns 200 with structured response
-      // Empty sources is NOT an error - it's a valid fallback
       if (response.status === 200 && response.data) {
         const aiMessage = {
           type: 'ai',
           content: response.data.answer,
-          sources: response.data.sources || [], // Use empty array if sources not provided
+          sources: response.data.sources || [],
           confidence: response.data.confidence,
           confidence_level: response.data.confidence_level,
           ask_human: response.data.ask_human
@@ -108,24 +104,14 @@ function ChatPage({ userType, messages, setMessages }) {
 
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        // Unexpected: response exists but not 200 status
         throw new Error(`Unexpected response status: ${response.status}`);
       }
     } catch (error) {
       console.error('❌ Chat error:', error);
-      console.error('Error details:', {
-        hasResponse: !!error.response,
-        hasRequest: !!error.request,
-        message: error.message,
-        responseData: error.response?.data,
-        responseStatus: error.response?.status
-      });
       
-      // Only show "No response from server" on actual network errors
       let errorContent = 'Sorry, I encountered an error. Please try again.';
       
       if (error.response) {
-        // Server responded with non-200 status
         const status = error.response.status;
         const detail = error.response.data?.detail;
         
@@ -139,10 +125,8 @@ function ChatPage({ userType, messages, setMessages }) {
           errorContent = detail || `Server error (${status}). Please try again.`;
         }
       } else if (error.request) {
-        // Request made but no response - true network error
         errorContent = 'No response from server. Please check your connection and try again.';
       } else {
-        // Request setup error
         errorContent = 'Error setting up the request. Please try again.';
       }
       
@@ -195,8 +179,6 @@ function ChatPage({ userType, messages, setMessages }) {
     return 'Low';
   };
 
-
-
   const messageVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
     visible: {
@@ -209,12 +191,545 @@ function ChatPage({ userType, messages, setMessages }) {
 
   return (
     <div className="chat-container">
+      <style>
+        {`
+          .chat-container {
+            display: flex;
+            height: 100vh;
+            background: var(--color-bg-gradient);
+            overflow: hidden;
+          }
+
+          .chat-sidebar {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--color-border-light);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+          }
+
+          .chat-sidebar-header {
+            padding: 30px 25px;
+            background: var(--color-emerald);
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+          }
+
+          .chat-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+          }
+
+          .chat-logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+          }
+
+          .chat-user-type {
+            font-size: 13px;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .chat-sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 25px;
+          }
+
+          .chat-section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .chat-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--color-emerald);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+          }
+
+          .chat-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+          }
+
+          .chat-button-secondary {
+            background: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+            margin-bottom: 20px;
+          }
+
+          .chat-button-secondary:hover {
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+          }
+
+          .chat-documents-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+          }
+
+          .chat-documents-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+          }
+
+          .chat-documents-count {
+            background: var(--color-emerald);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+
+          .chat-empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            font-style: italic;
+          }
+
+          .chat-document-item {
+            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease-in-out;
+          }
+
+          .chat-document-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+
+          .chat-document-icon {
+            font-size: 28px;
+            color: var(--color-emerald);
+            flex-shrink: 0;
+          }
+
+          .chat-document-info {
+            flex: 1;
+            min-width: 0;
+          }
+
+          .chat-document-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-primary);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .chat-document-pages {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+          }
+
+          .chat-delete-button {
+            padding: 8px;
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .chat-delete-button:hover {
+            background: rgba(239, 68, 68, 0.1);
+            transform: scale(1.1);
+          }
+
+          .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.98);
+            overflow: hidden;
+          }
+
+          .chat-header {
+            padding: 25px 35px;
+            background: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+          }
+
+          .chat-title {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--color-emerald);
+          }
+
+          .chat-subtitle {
+            margin: 0;
+            font-size: 14px;
+            color: var(--color-text-secondary);
+          }
+
+          .chat-messages-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.8) 100%);
+          }
+
+          .chat-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--color-text-secondary);
+          }
+
+          .chat-empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: var(--color-emerald);
+          }
+
+          .chat-empty-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin: 0 0 10px 0;
+          }
+
+          .chat-empty-text {
+            font-size: 16px;
+            color: var(--color-text-secondary);
+            margin: 0;
+          }
+
+          .message-wrapper {
+            margin-bottom: 20px;
+            display: flex;
+          }
+
+          .message-user {
+            justify-content: flex-end;
+          }
+
+          .message-ai {
+            justify-content: flex-start;
+          }
+
+          .message-bubble {
+            max-width: 75%;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+          }
+
+          .message-bubble-user {
+            background: var(--color-emerald);
+            color: white;
+            padding: 18px 22px;
+          }
+
+          .message-bubble-ai {
+            background: white;
+            color: var(--color-text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .message-header {
+            padding: 12px 18px;
+            background: rgba(16, 185, 129, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          .message-ai-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-emerald);
+          }
+
+          .message-content {
+            padding: 18px 22px;
+            font-size: 15px;
+            line-height: 1.7;
+          }
+
+          .copy-button {
+            background: transparent;
+            border: none;
+            padding: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out;
+            color: var(--color-emerald);
+          }
+
+          .copy-button:hover {
+            background: rgba(16, 185, 129, 0.1);
+            transform: scale(1.1);
+          }
+
+          .sources-container {
+            padding: 15px 18px 18px;
+            background: rgba(16, 185, 129, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+          }
+
+          .sources-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-bottom: 12px;
+          }
+
+          .source-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--color-text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .source-document {
+            font-weight: 700;
+            color: var(--color-emerald);
+            font-size: 13px;
+          }
+
+          .source-page {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+          }
+
+          .confidence-container {
+            padding: 12px 18px;
+            background: rgba(16, 185, 129, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          }
+
+          .confidence-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .confidence-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .confidence-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .confidence-percentage {
+            font-size: 14px;
+            font-weight: 700;
+          }
+
+          .ask-human-button {
+            margin: 12px 18px 18px;
+            padding: 10px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease-in-out;
+            width: calc(100% - 36px);
+          }
+
+          .ask-human-button:hover {
+            background: #dc2626;
+            transform: scale(1.02);
+          }
+
+          .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 16px;
+            padding: 18px 22px;
+            font-size: 15px;
+            line-height: 1.6;
+          }
+
+          .error-icon {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #991b1b;
+          }
+
+          .chat-input-container {
+            padding: 25px 35px;
+            background: white;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            flex-shrink: 0;
+          }
+
+          .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+          }
+
+          .chat-input {
+            flex: 1;
+            padding: 16px 20px;
+            font-size: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+            font-family: inherit;
+            background: white;
+            color: var(--color-text-primary);
+          }
+
+          .chat-input:focus {
+            border-color: var(--color-emerald);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+          }
+
+          .chat-send-button {
+            padding: 16px 28px;
+            background: var(--color-emerald);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            flex-shrink: 0;
+          }
+
+          .chat-send-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+          }
+
+          .chat-send-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            box-shadow: none;
+          }
+
+          .loading-bubble {
+            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px 24px;
+            max-width: 120px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+          }
+
+          .dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          }
+
+          .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-emerald);
+          }
+        `}
+      </style>
 
       {/* Sidebar */}
       <div className="chat-sidebar">
         <div className="chat-sidebar-header">
           <div className="chat-logo">
-            <span>🤖</span>
+            <span style={{ fontSize: '28px' }}>🤖</span>
             <h1 className="chat-logo-text">WorkMaster</h1>
           </div>
           <p className="chat-user-type">
@@ -235,9 +750,10 @@ function ChatPage({ userType, messages, setMessages }) {
 
           {userType === 'student' && (
             <motion.button
-              className="chat-button chat-button-analytics"
+              className="chat-button"
+              style={{ background: '#8b5cf6' }}
               onClick={() => navigate('/student-analytics')}
-              whileHover={{ scale: 1.02, boxShadow: '0 6px 20px rgba(139, 92, 246, 0.4)' }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <FiTrendingUp size={18} />
@@ -247,9 +763,9 @@ function ChatPage({ userType, messages, setMessages }) {
 
           {userType === 'company' && (
             <motion.button
-              className="chat-button chat-button-gaps"
+              className="chat-button chat-button-secondary"
               onClick={() => navigate('/knowledge-gaps')}
-              whileHover={{ scale: 1.02, boxShadow: '0 6px 20px rgba(245, 158, 11, 0.4)' }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <FiTrendingDown size={18} />
@@ -281,7 +797,7 @@ function ChatPage({ userType, messages, setMessages }) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}
+                  whileHover={{ scale: 1.02 }}
                 >
                   <div className="chat-document-icon">
                     {doc.file_type === '.pdf' ? '📄' : 
@@ -299,7 +815,7 @@ function ChatPage({ userType, messages, setMessages }) {
                     className="chat-delete-button"
                     onClick={() => handleDeleteDocument(doc.filename)}
                     disabled={deletingDoc === doc.filename}
-                    whileHover={{ scale: 1.1, background: 'rgba(239, 68, 68, 0.1)' }}
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     {deletingDoc === doc.filename ? '...' : <FiTrash2 size={18} />}
@@ -361,7 +877,7 @@ function ChatPage({ userType, messages, setMessages }) {
                               <motion.button
                                 className="copy-button"
                                 onClick={() => handleCopyToClipboard(msg.content, index)}
-                                whileHover={{ scale: 1.1, background: 'rgba(16, 185, 129, 0.1)' }}
+                                whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                               >
                                 {copiedIndex === index ? <FiCheck size={16} /> : <FiCopy size={16} />}
